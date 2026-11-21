@@ -80,9 +80,9 @@ export function stageShot(name, w) {
     // neon-lit marina, 5 stars, police boats + helicopter, city lights on water.
     set('night', 4, 5);
     w.exitVehicle(true);
-    // Mara on the dock by the boat, facing it — close enough to read as a
-    // person, with the neon marina + skyline + dark water behind her.
-    player.pos.set(42, 0, 158); player.heading = 0.30;
+    // Mara on the dock LEFT of the boat (clear of the centre banner),
+    // facing the boat — big enough to read as a person.
+    player.pos.set(38.5, 0, 159); player.heading = 0.8;
     player.human.group.position.copy(player.pos);
     player.human.setPose('idle', 0.5);
     // boat right at the dock edge, bow out to sea

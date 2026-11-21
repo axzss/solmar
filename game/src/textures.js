@@ -240,7 +240,7 @@ export function facadeSet(rng, { base = '#5a5f6e', floors = 12, cols = 8, lit = 
   }, { srgb: false });
   return { map, emissiveMap };
 }
-export function signTexture(rng, text, { w = 1024, h = 256, fg = '#ffd76a', bg = '#101c3a', font = 'bold 120px Georgia' } = {}) {
+export function signTexture(rng, text, { w = 1024, h = 256, fg = '#ffd76a', bg = '#101c3a', font = 'bold 96px Georgia' } = {}) {
   return canvasTex(w, (ctx) => {
     ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = 'rgba(255,215,106,0.9)'; ctx.lineWidth = 6; ctx.strokeRect(10, 10, w - 20, h - 20);
