@@ -2,6 +2,7 @@
 // the player/vehicles/police/camera, sets the mission + wanted level, and
 // flips window.__shotReady once the frame is composed.
 import * as THREE from 'three';
+import { gpsRoute } from './missions.js';
 
 function lookAt(cam, from, to) {
   cam.position.copy(from);
@@ -18,16 +19,20 @@ export function stageShot(name, w) {
     if (wanted >= 4) police.update(0.01, w.time, player, w.policeCallbacks);
   };
   if (name === 'dawn') {
-    // Shot 1 — dawn, elevated 3/4: Mara on the motorcycle at an on-ramp,
-    // skyline + suspension bridge behind, GPS route to mission 1, 0 stars.
+    // Shot 1 — dawn, low 3/4 behind the bike ON the east road (z=-40),
+    // Mara riding toward the suspension bridge, skyline ahead, GPS route
+    // to mission 1 pinned on the minimap, 0 stars.
     set('dawn', 0, 0);
     w.enterVehicle(w.bike, true);
-    w.bike.pos.set(30, 0, 10); w.bike.heading = 1.83; w.bike.speed = 0;
-    w.bike.group.position.copy(w.bike.pos); w.bike.group.rotation.y = 1.83;
+    w.bike.pos.set(60, 0, -40); w.bike.heading = Math.PI / 2; w.bike.speed = 0;
+    w.bike.group.position.copy(w.bike.pos);
+    w.bike.group.rotation.y = w.bike.heading - Math.PI / 2;
     player.human.setPose('drive', 0);
+    missions.pinTarget = w.city.landmarks.garage;
+    missions.route = gpsRoute(w.bike.pos, w.city.landmarks.garage);
     lookAt(camera,
-      new THREE.Vector3(30 - Math.sin(1.83) * 8.5, 3.4, 10 - Math.cos(1.83) * 8.5),
-      new THREE.Vector3(30 + Math.sin(1.83) * 14, 1.2, 10 + Math.cos(1.83) * 14));
+      new THREE.Vector3(60 - 8.2, 2.9, -40 + 3.4),
+      new THREE.Vector3(60 + 16, 1.1, -40 - 1.5));
     // helicopter idle on the helipad
     police.heli.group.visible = true;
     police.heli.group.position.copy(w.city.landmarks.helipad).add(new THREE.Vector3(0, 1.2, 0));
@@ -57,7 +62,8 @@ export function stageShot(name, w) {
     missions.step = 1; missions.timer = 45; // survive phase
     w.enterVehicle(w.sportCar, true);
     w.sportCar.pos.set(0, 0, 44); w.sportCar.heading = Math.PI; w.sportCar.speed = 11;
-    w.sportCar.group.position.copy(w.sportCar.pos); w.sportCar.group.rotation.y = Math.PI;
+    w.sportCar.group.position.copy(w.sportCar.pos);
+    w.sportCar.group.rotation.y = w.sportCar.heading - Math.PI / 2;
     police.spawnRoadblockAhead(new THREE.Vector3(0, 0, 44), Math.PI);
     // police sedan right behind, ramming
     if (police.cars[0]) {
@@ -74,12 +80,13 @@ export function stageShot(name, w) {
     // neon-lit marina, 5 stars, police boats + helicopter, city lights on water.
     set('night', 4, 5);
     w.exitVehicle(true);
-    player.pos.set(40, 0, 152); player.heading = Math.PI; // facing the water (south)
+    player.pos.set(40, 0, 152); player.heading = 0; // facing the water (+z, south)
     player.human.group.position.copy(player.pos);
     player.human.setPose('idle', 0.5);
-    // boat right at the dock edge, police boats out on the water
-    w.boat.pos.set(44.5, 0, 166); w.boat.heading = Math.PI; w.boat.speed = 0;
-    w.boat.group.position.set(44.5, -0.1, 166); w.boat.group.rotation.y = Math.PI;
+    // boat right at the dock edge, bow out to sea
+    w.boat.pos.set(44.5, 0, 166); w.boat.heading = 0; w.boat.speed = 0;
+    w.boat.group.position.set(44.5, -0.1, 166);
+    w.boat.group.rotation.y = w.boat.heading - Math.PI / 2;
     police.update(0.01, w.time, player, w.policeCallbacks);
     lookAt(camera,
       new THREE.Vector3(22, 7.5, 138),

@@ -88,7 +88,7 @@ for (const shot of targets) {
   await send('Page.navigate', { url: `http://127.0.0.1:${PORT}/?shot=${shot.name}&seed=7` });
   const t0 = Date.now();
   let ready = false, lastState = '';
-  while (Date.now() - t0 < 150000) {
+  while (Date.now() - t0 < 420000) {
     await sleep(2000);
     try {
       ready = await evalJs('window.__shotReady === true');

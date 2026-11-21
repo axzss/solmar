@@ -232,7 +232,7 @@ function wreckVehicle() {
 function enterVehicle(d, silent = false) {
   exitVehicle(true);
   player.vehicle = d;
-  mara.group.visible = false;
+  // Mara stays visible, seated on/in the vehicle (drive pose, seat offset)
   player.human.setPose('drive', 0);
   d.setHeadlights(presetName === 'night' || presetName === 'dusk-rain', 60);
   if (!silent) {
@@ -344,6 +344,14 @@ function updatePlayer(dt) {
     player.pos.copy(v.pos);
     player.heading = v.heading;
     player.speed = Math.abs(v.speed);
+    // seat Mara on the vehicle: local offset rotated by the vehicle quaternion
+    const seat = v.kind === 'bike' ? { off: new THREE.Vector3(-0.32, 0, 0), rootY: -0.10 }
+      : v.kind === 'boat' ? { off: new THREE.Vector3(0.5, 0, 0), rootY: -0.05 }
+      : { off: new THREE.Vector3(0.2, 0, -0.4), rootY: -0.10 };
+    mara.group.position.copy(v.pos).add(seat.off.clone().applyQuaternion(v.group.quaternion));
+    mara.group.position.y = v.pos.y + seat.rootY;
+    mara.group.rotation.y = v.heading;
+    mara.setPose('drive', time);
     if (v.kind === 'boat') particles.wakeAt(new THREE.Vector3(v.pos.x - Math.sin(v.heading) * 2.6, 0, v.pos.z - Math.cos(v.heading) * 2.6), player.speed);
     audio.setEngine(player.speed / 40, true);
     if (input.pressed('KeyE') && !updatePlayer._eLock) { updatePlayer._eLock = true; exitVehicle(); }
@@ -498,7 +506,7 @@ function animate() {
     sunOffset.set(p.sunPos[0], p.sunPos[1], p.sunPos[2]);
     lighting.sun.position.set(player.pos.x + sunOffset.x, sunOffset.y, player.pos.z + sunOffset.z);
     lighting.sun.target.position.copy(player.pos);
-    hud.showDistrict(districtAt(player.pos.x, player.pos.z));
+    if (!staged) hud.showDistrict(districtAt(player.pos.x, player.pos.z));
   }
   updateCamera(dt);
   // HUD + minimap

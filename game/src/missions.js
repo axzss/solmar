@@ -87,6 +87,7 @@ export class MissionManager {
     return this.stepDef ? this.stepDef.text : '';
   }
   targetPos() {
+    if (this.pinTarget) return this.pinTarget;
     const s = this.stepDef;
     if (!s) return null;
     if (s.target && this.landmarks[s.target]) return this.landmarks[s.target];
@@ -102,6 +103,7 @@ export class MissionManager {
   }
   advance() {
     this.step++;
+    this.pinTarget = null;
     const m = this.mission;
     if (this.step >= m.steps.length) {
       this.money += m.reward;

@@ -14,15 +14,21 @@ function latheRim() {
 }
 function makeWheel(radius = 0.36, width = 0.24) {
   const g = new THREE.Group();
+  const spinner = new THREE.Group();
+  g.add(spinner);
+  // tire: cylinder axis is Y by default; rotateX puts the axle along Z
+  // (car forward is local +X, axle across the car is Z).
   const tireGeo = smoothGeo(new THREE.CylinderGeometry(radius, radius, width, 20));
-  tireGeo.rotateZ(Math.PI / 2);
+  tireGeo.rotateX(Math.PI / 2);
   try { tireGeo.computeTangents(); } catch (e) { /* tangents optional */ }
   const tire = new THREE.Mesh(tireGeo, rubberMat());
-  tire.castShadow = true; g.add(tire);
-  const rim = latheRim(); rim.rotation.z = Math.PI / 2; rim.scale.setScalar(radius / 0.21); g.add(rim);
-  const disc = new THREE.Mesh(smoothGeo(new THREE.CylinderGeometry(radius * 0.55, radius * 0.55, width + 0.02, 16)), phys({ color: 0x888888, metalness: 0.9, roughness: 0.3 }));
-  disc.geometry.rotateZ(Math.PI / 2); g.add(disc);
-  return g;
+  tire.castShadow = true; spinner.add(tire);
+  const rim = latheRim(); rim.rotation.x = Math.PI / 2; rim.scale.setScalar(radius / 0.21); spinner.add(rim);
+  const discGeo = smoothGeo(new THREE.CylinderGeometry(radius * 0.55, radius * 0.55, width + 0.02, 16));
+  discGeo.rotateX(Math.PI / 2);
+  const disc = new THREE.Mesh(discGeo, phys({ color: 0x888888, metalness: 0.9, roughness: 0.3 }));
+  spinner.add(disc);
+  return { group: g, spinner };
 }
 
 export function makeCar(color = 0xd82a2a, opts = {}) {
@@ -64,9 +70,9 @@ export function makeCar(color = 0xd82a2a, opts = {}) {
     arch.rotation.set(0, wz > 0 ? 0 : Math.PI, 0);
     g.add(arch);
     const wheel = makeWheel(truck ? 0.44 : 0.36, truck ? 0.3 : 0.24);
-    wheel.position.set(wx, 0.36, wz);
-    g.add(wheel);
-    wheels.push({ mesh: wheel, steer: wx > 0 });
+    wheel.group.position.set(wx, 0.36, wz);
+    g.add(wheel.group);
+    wheels.push({ mesh: wheel.group, spinner: wheel.spinner, steer: wx > 0 });
   }
   // bumpers: beveled extrudes
   for (const s of [1, -1]) {
@@ -165,7 +171,7 @@ export function makeBike(color = 0xd82a2a) {
   const wheels = [];
   for (const wx of [0.78, -0.78]) {
     const wheel = makeWheel(0.33, 0.14);
-    wheel.position.set(wx, 0.33, 0); g.add(wheel); wheels.push({ mesh: wheel, steer: wx > 0 });
+    wheel.group.position.set(wx, 0.33, 0); g.add(wheel.group); wheels.push({ mesh: wheel.group, spinner: wheel.spinner, steer: wx > 0 });
   }
   const beam = new THREE.SpotLight(0xffeebb, 0, 22, 0.45, 0.5, 1.2);
   beam.position.set(0.86, 0.92, 0);
@@ -218,7 +224,8 @@ export class Driveable {
     this.heading = heading; this.speed = 0; this.steer = 0;
     this.health = 100; this.wheelSpin = 0;
     this.group.position.copy(this.pos);
-    this.group.rotation.y = heading;
+    // model forward is local +X; rotation.y = heading - PI/2 maps +X to (sin h, cos h)
+    this.group.rotation.y = heading - Math.PI / 2;
   }
   get kind() { return this.built.kind; }
   update(dt, input, colliders, onWaterOk = false) {
@@ -257,15 +264,15 @@ export class Driveable {
     }
     this.pos.x = cx; this.pos.z = cz;
     this.group.position.set(this.pos.x, this.kind === 'boat' ? -0.15 + Math.sin(performance.now() * 0.001) * 0.05 : 0, this.pos.z);
-    this.group.rotation.y = this.heading;
+    this.group.rotation.y = this.heading - Math.PI / 2;
     // lean: bikes lean into turns, cars roll slightly, boats pitch with speed
     const lean = -this.steer * (this.kind === 'bike' ? 0.45 : 0.06);
     this.group.rotation.z = damp(this.group.rotation.z, lean, 6, dt);
     if (this.kind === 'boat') this.group.rotation.x = damp(this.group.rotation.x, -this.speed * 0.002, 4, dt);
-    // wheels spin + front steer
+    // wheels spin around the axle (Z) + front steer around Y
     this.wheelSpin += (this.speed / 0.36) * dt;
     for (const w of this.built.wheels) {
-      w.mesh.rotation.x = this.wheelSpin;
+      w.spinner.rotation.z = this.wheelSpin;
       if (w.steer) w.mesh.rotation.y = this.steer * 0.42;
     }
     // brake light flare

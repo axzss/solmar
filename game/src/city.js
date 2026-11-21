@@ -121,8 +121,11 @@ export function buildCity(scene, rng) {
   });
   waterN.repeat.set(6, 6);
 
-  // ---- ground + water
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(340, 340), mats.concrete);
+  // ---- ground + water (ground concrete tiled 20x so the 1024px map stays crisp)
+  const groundTex = concrete.map.clone();
+  groundTex.repeat.set(20, 20); groundTex.needsUpdate = true;
+  const groundMat = phys({ map: groundTex, normalMap: concrete.normal, roughness: 0.92, envMapIntensity: 0.6 });
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(340, 340), groundMat);
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
   const water = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), waterMat);
   water.rotation.x = -Math.PI / 2; water.position.y = -0.55; scene.add(water);
@@ -157,7 +160,7 @@ export function buildCity(scene, rng) {
   const facOld = facadeSet(rng, { base: '#7a5f46', floors: 6, cols: 7, lit: 0.22 });
   const facPort = facadeSet(rng, { base: '#5e6258', floors: 5, cols: 6, lit: 0.12 });
   const facMat = (fac, tint) => phys({
-    map: fac.map, emissiveMap: fac.emissiveMap, emissive: 0xffffff, emissiveIntensity: 0.9,
+    map: fac.map, emissiveMap: fac.emissiveMap, emissive: 0xffffff, emissiveIntensity: 0.55,
     roughness: 0.75, metalness: 0.08, color: tint || 0xffffff, envMapIntensity: 0.7,
   });
   const downtownMat = facMat(facDowntown);
@@ -169,8 +172,8 @@ export function buildCity(scene, rng) {
     const g = new THREE.Group();
     g.position.set(x, 0, z);
     const podiumH = Math.min(4.5, h * 0.22);
-    const podium = new THREE.Mesh(rbox(w + 2.4, podiumH, d + 2.4, 0.15, 4),
-      phys({ color: opts.podiumColor || 0x8a8578, roughness: 0.85 }));
+    // podium wears the same facade atlas (ground-floor retail), not a flat slab
+    const podium = new THREE.Mesh(rbox(w + 2.4, podiumH, d + 2.4, 0.15, 4), mat);
     podium.position.y = podiumH / 2; podium.castShadow = true; podium.receiveShadow = true; g.add(podium);
     const tower = new THREE.Mesh(rbox(w, h, d, 0.15, 4), mat);
     tower.position.y = podiumH + h / 2; tower.castShadow = true; tower.receiveShadow = true; g.add(tower);
@@ -377,7 +380,7 @@ export function buildCity(scene, rng) {
     }
     const boat = makeBoat(rng.pick([0x2a6fd8, 0xd82a2a, 0xf2f2f2]));
     boat.group.position.set(d * 14 - 14 + 4.5, -0.1, -4 + d * 3);
-    boat.group.rotation.y = Math.PI / 2;
+    boat.group.rotation.y = -Math.PI / 2; // bow out to sea (+z)
     marina.add(boat.group);
   }
   landmarks.marina = new THREE.Vector3(40, 0, 162);
