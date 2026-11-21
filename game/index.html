@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOLMAR — an original open-world crime game</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0a0e18; font-family: Arial, Helvetica, sans-serif; }
+  #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  .hud { position: fixed; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.9); z-index: 5; pointer-events: none; }
+  #missionTitle { top: 12px; left: 14px; font-size: 19px; font-weight: bold; color: #ffd76a; }
+  #objective { top: 38px; left: 14px; font-size: 14px; background: rgba(0,0,0,0.55); padding: 6px 10px; border-left: 3px solid #ffd76a; border-radius: 3px; max-width: 420px; }
+  #timer { top: 74px; left: 14px; font-size: 20px; font-weight: bold; color: #ff6a4a; }
+  #topRight { top: 12px; right: 14px; text-align: right; }
+  #stars { font-size: 22px; letter-spacing: 2px; }
+  #money { font-size: 24px; font-weight: bold; color: #6aff8a; }
+  #clock, #packages { font-size: 13px; color: #ddd; }
+  #bottomLeft { bottom: 14px; left: 14px; width: 240px; }
+  .barLabel { font-size: 11px; letter-spacing: 1px; color: #ddd; }
+  .bar { height: 12px; background: rgba(0,0,0,0.6); border: 1px solid #888; border-radius: 2px; margin: 2px 0 6px; }
+  #healthFill { height: 100%; width: 100%; background: #3fae5a; }
+  #armorFill { height: 100%; width: 0%; background: #54a8ff; }
+  #weapon { font-size: 15px; font-weight: bold; }
+  #hint { font-size: 11px; color: #bbb; margin-top: 4px; }
+  #bottomRight { bottom: 14px; right: 14px; text-align: right; }
+  #speed { font-size: 26px; font-weight: bold; }
+  #radio { font-size: 13px; background: rgba(0,0,0,0.6); padding: 5px 8px; border-radius: 4px; margin-top: 4px; }
+  #radioBars { display: flex; gap: 2px; justify-content: flex-end; align-items: flex-end; height: 16px; margin-top: 3px; }
+  #radioBars span { width: 4px; background: #54e0ff; display: inline-block; }
+  #minimap { position: fixed; right: 14px; bottom: 118px; width: 168px; height: 168px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.6); z-index: 5; background: #101c3a; }
+  #district { top: 46%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; font-weight: bold; letter-spacing: 3px; opacity: 0; transition: opacity 0.5s; color: #fff; }
+  #toast { top: 110px; left: 50%; transform: translateX(-50%); font-size: 15px; background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 6px; opacity: 0; transition: opacity 0.4s; white-space: nowrap; }
+  #center { top: 58%; left: 50%; transform: translateX(-50%); font-size: 18px; text-align: center; }
+  #damage { position: fixed; inset: 0; pointer-events: none; z-index: 6; opacity: 0; transition: opacity 0.2s;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(255,0,0,0.55) 100%); }
+  .screen { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, rgba(10,14,30,0.92), rgba(60,20,40,0.88)); color: #fff; text-align: center; }
+  .screen h1 { font-size: 64px; letter-spacing: 8px; color: #ffd76a; margin: 0; text-shadow: 0 0 30px rgba(255,180,60,0.6); }
+  .screen h2 { font-size: 15px; font-weight: normal; color: #ddd; max-width: 560px; line-height: 1.6; }
+  .screen button { pointer-events: auto; font-size: 18px; padding: 12px 34px; margin: 8px; border: none; border-radius: 6px;
+    background: #ffd76a; color: #111; font-weight: bold; cursor: pointer; }
+  .screen button:hover { background: #ffe9a8; }
+  .screen button.ghost { background: transparent; color: #ffd76a; border: 2px solid #ffd76a; }
+  #pauseScreen, #endScreen, #bustedScreen { display: none; }
+  #crosshair { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); color: #fff; font-size: 20px; z-index: 5; text-shadow: 0 0 4px #000; pointer-events: none; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three.module.min.js",
+  "three/addons/": "./vendor/addons/"
+} }
+</script>
+</head>
+<body>
+<canvas id="game" aria-label="SOLMAR: an original open-world crime game. Mara Solis, getaway driver, in the coastal city of Solmar."></canvas>
+<div id="damage"></div>
+<div class="hud" id="missionTitle">MISSION 1: First Ride — $500</div>
+<div class="hud" id="objective">Steal any car</div>
+<div class="hud" id="timer"></div>
+<div class="hud" id="topRight">
+  <div id="stars">☆☆☆☆☆</div>
+  <div id="money">$200</div>
+  <div id="clock">DAWN 06:40</div>
+  <div id="packages">📦 0/10</div>
+</div>
+<div class="hud" id="bottomLeft">
+  <div class="barLabel">HEALTH</div><div class="bar"><div id="healthFill"></div></div>
+  <div class="barLabel">ARMOR</div><div class="bar"><div id="armorFill"></div></div>
+  <div id="weapon">FISTS —</div>
+  <div id="hint">[1] Fists [2] Pistol [3] Shotgun — R reload<br>WASD move · E enter/exit · F punch · Click shoot · N next mission · T taxi · M music · C radio · Esc pause</div>
+</div>
+<div class="hud" id="bottomRight">
+  <div id="speed">0 mph</div>
+  <div id="radio">♪ SOLMAR FM — ON (M)</div>
+  <div id="radioBars"></div>
+</div>
+<canvas id="minimap" width="168" height="168"></canvas>
+<div class="hud" id="district"></div>
+<div class="hud" id="toast"></div>
+<div class="hud" id="center"></div>
+<div id="crosshair">+</div>
+<div class="screen" id="startScreen">
+  <h1>SOLMAR</h1>
+  <h2>Sun-soaked coastal open world. Mara Solis, ex-stunt driver turned getaway driver,
+  takes five jobs across the city of Solmar — cars, bikes, boats, bank vaults and a
+  five-star escape. An original game: no Rockstar assets, all art and sound procedural.</h2>
+  <div>
+    <button id="startBtn">START — Mission 1</button>
+    <button id="continueBtn" class="ghost">CONTINUE</button>
+  </div>
+  <h2>WASD move · Shift run · Space jump · E enter/exit vehicle · Click shoot · 1/2/3 weapons · R reload · F punch · N next mission · T taxi · M music · C radio · Esc pause</h2>
+</div>
+<div class="screen" id="pauseScreen">
+  <h1>PAUSED</h1>
+  <div>
+    <button id="resumeBtn">RESUME</button>
+    <button id="restartBtn" class="ghost">RESTART MISSION</button>
+    <button id="quitBtn" class="ghost">SAVE &amp; QUIT TO MENU</button>
+  </div>
+</div>
+<div class="screen" id="endScreen">
+  <h1>SOLMAR LEGEND</h1>
+  <h2>All five missions complete. Mara made it out — the city is hers.</h2>
+  <div><button id="againBtn">PLAY AGAIN</button></div>
+</div>
+<div class="screen" id="bustedScreen">
+  <h1>BUSTED</h1>
+  <h2>The Solmar PD caught up with you. You wake at the hospital, $100 lighter, wanted level cleared.</h2>
+  <div><button id="respawnBtn">RESPAWN AT HOSPITAL</button></div>
+</div>
+<p id="status" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap">SOLMAR — an original open-world game. No Rockstar assets. WASD move · E enter/exit · F punch · Click shoot · N next mission · T taxi · M music · C radio · Esc pause</p>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
