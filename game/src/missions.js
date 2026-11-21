@@ -60,7 +60,7 @@ export class MissionManager {
     this.taxi = null; this.bankCash = 0;
     // beacon: additive cylinder + rotating octahedron diamond
     this.beacon = new THREE.Group();
-    this.beaconEnabled = true; // staged night shot hides the beacon pillar
+    this.beaconOn = true; // night staging switches the beacon pillar off
     const cyl = new THREE.Mesh(
       new THREE.CylinderGeometry(1.6, 1.6, 30, 16, 1, true),
       new THREE.MeshBasicMaterial({ color: 0xffd76a, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
@@ -88,7 +88,7 @@ export class MissionManager {
     return this.stepDef ? this.stepDef.text : '';
   }
   targetPos() {
-    if (this.pinTarget) return this.pinTarget;
+    if (this.pin) return this.pin;
     const s = this.stepDef;
     if (!s) return null;
     if (s.target && this.landmarks[s.target]) return this.landmarks[s.target];
@@ -104,7 +104,7 @@ export class MissionManager {
   }
   advance() {
     this.step++;
-    this.pinTarget = null;
+    this.pin = null;
     const m = this.mission;
     if (this.step >= m.steps.length) {
       this.money += m.reward;
@@ -135,8 +135,8 @@ export class MissionManager {
         this.onEvent({ type: 'timer-fail', mission: m });
       }
     }
-    const tp = this.pinTarget || this.targetPos();
-    if (tp && this.beaconEnabled) {
+    const tp = this.pin || this.targetPos();
+    if (tp && this.beaconOn) {
       this.beacon.visible = true;
       this.beacon.position.set(tp.x, 0, tp.z);
       this.beacon.userData.diamond.rotation.y += dt * 2;

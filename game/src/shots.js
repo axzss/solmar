@@ -2,7 +2,7 @@
 // the player/vehicles/police/camera, sets the mission + wanted level, and
 // flips window.__shotReady once the frame is composed.
 import * as THREE from 'three';
-import { gpsRoute } from './missions.js';
+import { gpsRoute as gps } from './missions.js';
 
 function lookAt(cam, from, to) {
   cam.position.copy(from);
@@ -19,20 +19,19 @@ export function stageShot(name, w) {
     if (wanted >= 4) police.update(0.01, w.time, player, w.policeCallbacks);
   };
   if (name === 'dawn') {
-    // Shot 1 — dawn, low 3/4 behind the bike ON the east road (z=-40),
-    // Mara riding toward the suspension bridge, skyline ahead, GPS route
-    // to mission 1 pinned on the minimap, 0 stars.
+    // Shot 1 - dawn, low 3/4 behind the bike ON the east road (z=-40),
+    // Mara rides toward the suspension bridge, skyline ahead, GPS route
+    // to mission 1 pinned on the minimap, zero stars.
     set('dawn', 0, 0);
     w.enterVehicle(w.bike, true);
-    w.bike.pos.set(60, 0, -40); w.bike.heading = Math.PI / 2; w.bike.speed = 0;
-    w.bike.group.position.copy(w.bike.pos);
-    w.bike.group.rotation.y = w.bike.heading - Math.PI / 2;
+    w.bike.pos.set(60,0,-40); w.bike.heading = Math.PI * 0.5; w.bike.speed = 0;
+    w.bike.group.position.copy(w.bike.pos); w.bike.group.rotation.y = w.bike.heading - Math.PI * 0.5;
     player.human.setPose('drive', 0);
-    missions.pinTarget = w.city.landmarks.garage;
-    missions.route = gpsRoute(w.bike.pos, w.city.landmarks.garage);
+    missions.pin = w.city.landmarks.garage;
+    missions.route = gps(w.bike.pos, w.city.landmarks.garage);
     lookAt(camera,
-      new THREE.Vector3(60 - 8.2, 2.9, -40 + 3.4),
-      new THREE.Vector3(60 + 16, 1.1, -40 - 1.5));
+      new THREE.Vector3(51.8, 2.9, -36.6),
+      new THREE.Vector3(76, 1.1, -41.5));
     // helicopter idle on the helipad
     police.heli.group.visible = true;
     police.heli.group.position.copy(w.city.landmarks.helipad).add(new THREE.Vector3(0, 1.2, 0));
@@ -51,8 +50,8 @@ export function stageShot(name, w) {
     w.combat.setWeapon('pistol');
     w.peds.scare(30, -12, 26);
     lookAt(camera,
-      new THREE.Vector3(30 + 4.0, 4.0, -12 + 11.0),
-      new THREE.Vector3(30, 5.2, -30));
+      new THREE.Vector3(34, 4, -1),
+      new THREE.Vector3(30,5.2,-30));
     hud.toast('MISSION 3 — grab the cash');
   } else if (name === 'storm') {
     // Shot 3 — dusk rain, low chase cam behind the sports car drifting a wet
@@ -62,8 +61,7 @@ export function stageShot(name, w) {
     missions.step = 1; missions.timer = 45; // survive phase
     w.enterVehicle(w.sportCar, true);
     w.sportCar.pos.set(0, 0, 44); w.sportCar.heading = Math.PI; w.sportCar.speed = 11;
-    w.sportCar.group.position.copy(w.sportCar.pos);
-    w.sportCar.group.rotation.y = w.sportCar.heading - Math.PI / 2;
+    w.sportCar.group.position.copy(w.sportCar.pos); w.sportCar.group.rotation.y = w.sportCar.heading - Math.PI * 0.5;
     police.spawnRoadblockAhead(new THREE.Vector3(0, 0, 44), Math.PI);
     // police sedan right behind, ramming
     if (police.cars[0]) {
@@ -80,23 +78,22 @@ export function stageShot(name, w) {
     // neon-lit marina, 5 stars, police boats + helicopter, city lights on water.
     set('night', 4, 5);
     w.exitVehicle(true);
-    // Mara on the dock LEFT of the boat (clear of the centre banner),
-    // facing the boat. NOTE: updatePlayer clamps player z to <=152, so
-    // staging her any further south silently teleports her to the edge.
-    player.pos.set(42, 0, 150); player.heading = 0.21;
+    // Mara stands on the dock LEFT of the boat (clear of the centre banner),
+    // facing the boat. NOTE: updatePlayer clamps player z at 152, so
+    // putting her further south would teleport her back to the edge.
+    player.pos.set(42,0,150); player.heading = 0.21;
     player.human.group.position.copy(player.pos);
     player.human.setPose('idle', 0.5);
-    // boat right at the dock edge, bow out to sea
-    w.boat.pos.set(44.5, 0, 162); w.boat.heading = 0; w.boat.speed = 0;
-    w.boat.group.position.set(44.5, -0.1, 162);
-    w.boat.group.rotation.y = w.boat.heading - Math.PI / 2;
-    // hide the giant beacon pillar for this shot (it filled the frame)
-    missions.beaconEnabled = false;
-    missions.beacon.visible = false;
+    // boat at the dock edge, bow out to sea
+    w.boat.pos.set(44.5,0,162); w.boat.heading = 0; w.boat.speed = 0;
+    w.boat.group.position.set(44.5, -0.1, 162); w.boat.group.rotation.y = w.boat.heading - Math.PI * 0.5;
+    // beacon pillar off for this shot (it filled the frame)
+    missions.beaconOn = false;
+    missions.beacon.visible=false;
     police.update(0.01, w.time, player, w.policeCallbacks);
     lookAt(camera,
-      new THREE.Vector3(33, 4.5, 141),
-      new THREE.Vector3(43, 1.2, 164));
+      new THREE.Vector3(33,4.5,141),
+      new THREE.Vector3(43,1.2,164));
     hud.setCenter('<div style="background:rgba(0,0,0,0.65);padding:10px 18px;border-radius:8px;color:#ffd76a;font-weight:bold">MISSION COMPLETE — +$3000 · SOLMAR LEGEND</div>');
   } else {
     w.staged = false;

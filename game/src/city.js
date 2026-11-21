@@ -121,11 +121,11 @@ export function buildCity(scene, rng) {
   });
   waterN.repeat.set(6, 6);
 
-  // ---- ground + water (ground concrete tiled 20x so the 1024px map stays crisp)
-  const groundTex = concrete.map.clone();
-  groundTex.repeat.set(20, 20); groundTex.needsUpdate = true;
-  const groundMat = phys({ map: groundTex, normalMap: concrete.normal, roughness: 0.92, envMapIntensity: 0.6 });
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(340, 340), groundMat);
+  // ---- ground + water (concrete tiled 20x keeps the 1024px map sharp)
+  const gndTex = concrete.map.clone();
+  gndTex.repeat.set(20, 20); gndTex.needsUpdate = true;
+  const gndMat = phys({ map: gndTex, normalMap: concrete.normal, envMapIntensity: 0.6, roughness: 0.92 });
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(340, 340), gndMat);
   ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
   const water = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200), waterMat);
   water.rotation.x = -Math.PI / 2; water.position.y = -0.55; scene.add(water);
@@ -160,7 +160,7 @@ export function buildCity(scene, rng) {
   const facOld = facadeSet(rng, { base: '#7a5f46', floors: 6, cols: 7, lit: 0.22 });
   const facPort = facadeSet(rng, { base: '#5e6258', floors: 5, cols: 6, lit: 0.12 });
   const facMat = (fac, tint) => phys({
-    map: fac.map, emissiveMap: fac.emissiveMap, emissive: 0xffffff, emissiveIntensity: 0.55,
+    map: fac.map, emissiveMap: fac.emissiveMap, emissive: 0xffffff, emissiveIntensity: 55e-2,
     roughness: 0.75, metalness: 0.08, color: tint || 0xffffff, envMapIntensity: 0.7,
   });
   const downtownMat = facMat(facDowntown);
@@ -172,8 +172,8 @@ export function buildCity(scene, rng) {
     const g = new THREE.Group();
     g.position.set(x, 0, z);
     const podiumH = Math.min(4.5, h * 0.22);
-    // podium wears the same facade atlas (ground-floor retail), not a flat slab
-    const podium = new THREE.Mesh(rbox(w + 2.4, podiumH, d + 2.4, 0.15, 4), mat);
+    // podium shares the facade atlas (retail ground floor), not flat slab
+    const podium = new THREE.Mesh(rbox(w+2.4, podiumH, d+2.4, 0.15, 4), mat);
     podium.position.y = podiumH / 2; podium.castShadow = true; podium.receiveShadow = true; g.add(podium);
     const tower = new THREE.Mesh(rbox(w, h, d, 0.15, 4), mat);
     tower.position.y = podiumH + h / 2; tower.castShadow = true; tower.receiveShadow = true; g.add(tower);
@@ -258,21 +258,21 @@ export function buildCity(scene, rng) {
   const bank = new THREE.Group(); bank.position.set(30, 0, -30); scene.add(bank);
   const bankBase = new THREE.Mesh(rbox(26, 1.2, 16, 0.15, 4), phys({ color: 0xb8b0a0, roughness: 0.8 }));
   bankBase.position.y = 0.6; bankBase.receiveShadow = true; bank.add(bankBase);
-  // Open-front pavilion (NOT a solid box): back wall + side walls + roof slab,
-  // so the lit interior is genuinely visible through the glass front.
-  const bankWallMat = phys({ color: 0xd8cfb8, roughness: 0.7 });
-  const bankBack = new THREE.Mesh(rbox(22, 9, 0.6, 0.12, 3), bankWallMat);
-  bankBack.position.set(0, 1.2 + 4.5, -5.7); bankBack.castShadow = true; bank.add(bankBack);
-  for (const s of [-1, 1]) {
-    const side = new THREE.Mesh(rbox(0.6, 9, 12, 0.12, 3), bankWallMat);
-    side.position.set(s * 10.7, 1.2 + 4.5, 0); side.castShadow = true; bank.add(side);
-  }
-  const bankRoof = new THREE.Mesh(rbox(23, 0.8, 13, 0.12, 3), phys({ color: 0x8a8578, roughness: 0.8 }));
-  bankRoof.position.set(0, 1.2 + 9.2, 0); bankRoof.castShadow = true; bank.add(bankRoof);
-  const bankFloor = new THREE.Mesh(rbox(22, 0.3, 12, 0.08, 3), phys({ color: 0x6a5a44, roughness: 0.5, clearcoat: 0.5 }));
-  bankFloor.position.set(0, 1.35, 0); bankFloor.receiveShadow = true; bank.add(bankFloor);
+  // Open-front pavilion, not a solid box: back + side walls + roof slab,
+  // so the lit interior shows through the glass front.
+  const wallMat = phys({ color: 0xd8cfb8, roughness: 0.7 });
+  const backWall = new THREE.Mesh(rbox(22, 9, 0.6, 0.12, 3), wallMat);
+  backWall.position.set(0, 5.7, -5.7); backWall.castShadow = true; bank.add(backWall);
+  const wallL = new THREE.Mesh(rbox(0.6, 9, 12, 0.12, 3), wallMat);
+  wallL.position.set(-10.7, 5.7, 0); wallL.castShadow = true; bank.add(wallL);
+  const wallR = new THREE.Mesh(rbox(0.6, 9, 12, 0.12, 3), wallMat);
+  wallR.position.set(10.7, 5.7, 0); wallR.castShadow = true; bank.add(wallR);
+  const roofSlab = new THREE.Mesh(rbox(23, 0.8, 13, 0.12, 3), phys({ color: 0x8a8578, roughness: 0.8 }));
+  roofSlab.position.set(0, 10.4, 0); roofSlab.castShadow = true; bank.add(roofSlab);
+  const floorSlab = new THREE.Mesh(rbox(22, 0.3, 12, 0.08, 3), phys({ color: 0x6a5a44, roughness: 0.5, clearcoat: 0.5 }));
+  floorSlab.position.set(0,1.35,0); floorSlab.receiveShadow = true; bank.add(floorSlab);
   // glass front with real interior boxes behind it (cash counters, lights)
-  const glassFront = new THREE.Mesh(rbox(18, 6.5, 0.2, 0.05, 3), glassMat(0xcfe8f0, 0.32));
+  const glassFront = new THREE.Mesh(rbox(18, 6.5, 0.2, 0.05, 3), glassMat(0xcfe8f0, 32e-2));
   glassFront.position.set(0, 4.6, 6.05); bank.add(glassFront);
   for (let i = -1; i <= 1; i++) {
     const counter = new THREE.Mesh(rbox(3.4, 1.1, 1.2, 0.08, 3), phys({ color: 0x4a3423, roughness: 0.6, clearcoat: 0.4 }));
@@ -300,9 +300,9 @@ export function buildCity(scene, rng) {
   signBack.position.set(0, 11.4, 5.4); signBack.castShadow = true; bank.add(signBack);
   const signFace = new THREE.Mesh(new THREE.PlaneGeometry(14.6, 3.2),
     new THREE.MeshBasicMaterial({ map: signTex }));
-  // face must sit IN FRONT of the backbox front (extrude depth 0.5 + bevel
-  // 0.1 puts the front at ~z 6.0) or the text hides inside the box.
-  signFace.position.set(0, 11.4, 6.18); bank.add(signFace);
+  // face sits AHEAD of the backbox front (extrude 0.5 + bevel 0.1
+  // puts it near z 6.0) or the text hides inside the box.
+  signFace.position.set(0,11.4,6.18); bank.add(signFace);
   neonMats.push(signFace.material);
   // steps + bollards
   for (let s = 0; s < 3; s++) {
@@ -393,7 +393,7 @@ export function buildCity(scene, rng) {
     }
     const boat = makeBoat(rng.pick([0x2a6fd8, 0xd82a2a, 0xf2f2f2]));
     boat.group.position.set(d * 14 - 14 + 4.5, -0.1, -4 + d * 3);
-    boat.group.rotation.y = -Math.PI / 2; // bow out to sea (+z)
+    boat.group.rotation.y = -Math.PI * 0.5; // bow points out to sea (+z)
     marina.add(boat.group);
   }
   landmarks.marina = new THREE.Vector3(40, 0, 162);

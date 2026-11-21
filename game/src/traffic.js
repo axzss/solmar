@@ -34,9 +34,9 @@ export class TrafficManager {
         c.leg = this.rng.range(20, 90);
       }
       c.built.group.position.copy(c.pos);
-      c.built.group.rotation.y = c.heading - Math.PI / 2;
+      c.built.group.rotation.y = c.heading - Math.PI * 0.5;
       c.wheelSpin += (c.speed / 0.36) * dt;
-      for (const w of c.built.wheels) w.spinner.rotation.z = c.wheelSpin;
+      for (const w of c.built.wheels) w.spin.rotation.z = c.wheelSpin;
       // respawn near the player when far away
       const dx = c.pos.x - playerPos.x, dz = c.pos.z - playerPos.z;
       if (dx * dx + dz * dz > 130 * 130) {

@@ -100,9 +100,9 @@ export class PoliceManager {
       d.heading += steer * 1.9 * dt;
       d.pos.x += Math.sin(d.heading) * d.speed * dt;
       d.pos.z += Math.cos(d.heading) * d.speed * dt;
-      d.group.position.copy(d.pos); d.group.rotation.y = d.heading - Math.PI / 2;
+      d.group.position.copy(d.pos); d.group.rotation.y = d.heading - Math.PI * 0.5;
       d.wheelSpin += (d.speed / 0.36) * dt;
-      for (const w of d.built.wheels) w.spinner.rotation.z = d.wheelSpin;
+      for (const w of d.built.wheels) w.spin.rotation.z = d.wheelSpin;
       // light-bar strobe
       const flash = Math.sin(t * 14) > 0;
       if (d.built.lightBar) {
@@ -174,7 +174,7 @@ export class PoliceManager {
       b.pos.z += Math.cos(b.heading) * 16 * dt;
       b.pos.z = Math.min(220, Math.max(160, b.pos.z));
       b.built.group.position.set(b.pos.x, -0.1, b.pos.z);
-      b.built.group.rotation.y = b.heading - Math.PI / 2;
+      b.built.group.rotation.y = b.heading - Math.PI * 0.5;
     }
     // spike strip hit?
     if (this.roadblock && !this.roadblock.hit && player.vehicle) {

@@ -6,7 +6,7 @@ export const PRESETS = {
     label: 'DAWN', clock: '06:40', sunColor: 0xffb36b, sunI: 2.6,
     sunPos: [90, 26, -40], hemiSky: 0x8fa8c8, hemiGround: 0x5a4a3a, hemiI: 0.55,
     skyTop: '#5d7ea6', skyMid: '#e8a06a', skyBot: '#f7c98a',
-    fog: 0xc99a7a, fogDensity: 0.0011, exposure: 1.05, envI: 0.7, lampI: 1.6, neonI: 1.2,
+    fog: 0xc99a7a, fogDensity: 1.1e-3, exposure: 1.05, envI: 0.7, lampI: 1.6, neonI: 1.2,
   },
   noon: {
     label: 'NOON', clock: '12:30', sunColor: 0xfff2d8, sunI: 3.4,
@@ -18,14 +18,14 @@ export const PRESETS = {
     label: 'DUSK RAIN', clock: '18:20', sunColor: 0xff7a4d, sunI: 1.9,
     sunPos: [-80, 18, 60], hemiSky: 0x6a5a8a, hemiGround: 0x3a3230, hemiI: 0.5,
     skyTop: '#3a2f5e', skyMid: '#c65a3a', skyBot: '#e88a4a',
-    fog: 0x5a4450, fogDensity: 0.0023, exposure: 1.02, envI: 0.65, lampI: 2.2, neonI: 1.8,
+    fog: 0x5a4450, fogDensity: 2.3e-3, exposure: 1.02, envI: 0.65, lampI: 2.2, neonI: 1.8,
     rain: true,
   },
   night: {
     label: 'NIGHT', clock: '22:15', sunColor: 0x8aa8ff, sunI: 0.55,
     sunPos: [-40, 60, -80], hemiSky: 0x24355e, hemiGround: 0x0e0e14, hemiI: 0.35,
     skyTop: '#060a1e', skyMid: '#101c3e', skyBot: '#1c2a52',
-    fog: 0x0a1226, fogDensity: 0.0012, exposure: 1.08, envI: 0.5, lampI: 2.6, neonI: 2.6,
+    fog: 0x0a1226, fogDensity: 1.2e-3, exposure: 1.08, envI: 0.5, lampI: 2.6, neonI: 2.6,
   },
 };
 
@@ -54,9 +54,9 @@ function skyCanvas(p) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.mapping = THREE.EquirectangularReflectionMapping;
-  // equirect sky: canvas top is the zenith — do NOT flip (default flipY
-  // inverts the gradient and puts the pale horizon on top of the sky).
-  t.flipY = false;
+  // equirect sky: canvas top is the zenith, so leave flipY off
+  // (default flip puts the pale horizon on top of the sky).
+  t.flipY=false;
   return t;
 }
 

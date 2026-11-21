@@ -106,11 +106,11 @@ function applyPreset(name) {
   const wet = p.rain ? 1.0 : 0.55;
   city.asphaltMat.clearcoat = wet;
   city.asphaltMat.clearcoatRoughness = p.rain ? 0.06 : 0.22;
-  // water: dark + calm at night, bright + reflective by day
+  // water: dark and calm at night, bright and reflective by day
   const night = name === 'night' || name === 'dusk-rain';
-  city.waterMat.color.setHex(name === 'night' ? 0x0a1c30 : name === 'dusk-rain' ? 0x0d2a38 : 0x0e4a5e);
-  city.waterMat.envMapIntensity = name === 'night' ? 0.55 : name === 'dusk-rain' ? 0.8 : 1.6;
-  city.waterMat.roughness = name === 'night' ? 0.22 : 0.12;
+  city.waterMat.color.setHex(name === 'dusk-rain' ? 0x0d2a38 : name === 'night' ? 0x0a1c30 : 0x0e4a5e);
+  city.waterMat.envMapIntensity = name === 'dusk-rain' ? 0.8 : name === 'night' ? 0.55 : 1.6;
+  city.waterMat.roughness = name !== 'night' ? 0.12 : 0.22;
   for (const d of parked) d.setHeadlights(night, 60);
   return p;
 }
@@ -236,7 +236,7 @@ function wreckVehicle() {
 function enterVehicle(d, silent = false) {
   exitVehicle(true);
   player.vehicle = d;
-  // Mara stays visible, seated on/in the vehicle (drive pose, seat offset)
+  // Mara stays visible, seated in/on the vehicle (drive pose + offset)
   player.human.setPose('drive', 0);
   d.setHeadlights(presetName === 'night' || presetName === 'dusk-rain', 60);
   if (!silent) {
@@ -348,14 +348,14 @@ function updatePlayer(dt) {
     player.pos.copy(v.pos);
     player.heading = v.heading;
     player.speed = Math.abs(v.speed);
-    // seat Mara on the vehicle: local offset rotated by the vehicle quaternion
-    const seat = v.kind === 'bike' ? { off: new THREE.Vector3(-0.32, 0, 0), rootY: -0.10 }
-      : v.kind === 'boat' ? { off: new THREE.Vector3(0.5, 0, 0), rootY: -0.05 }
-      : { off: new THREE.Vector3(0.2, 0, -0.4), rootY: -0.10 };
-    mara.group.position.copy(v.pos).add(seat.off.clone().applyQuaternion(v.group.quaternion));
-    mara.group.position.y = v.pos.y + seat.rootY;
-    mara.group.rotation.y = v.heading;
-    mara.setPose('drive', time);
+    // put Mara on the vehicle: local offset spun by its quaternion
+    const sit = v.kind === 'bike' ? { o: new THREE.Vector3(-0.32, 0, 0), dy: -0.1 }
+      : v.kind === 'boat' ? { o: new THREE.Vector3(0.5, 0, 0), dy: -0.05 }
+      : { o: new THREE.Vector3(0.2, 0, -0.4), dy: -0.1 };
+    mara.group.position.copy(v.pos).add(sit.o.clone().applyQuaternion(v.group.quaternion));
+    mara.group.position.y = v.pos.y + sit.dy;
+    mara.group.rotation.y=v.heading;
+    mara.setPose('drive',time);
     if (v.kind === 'boat') particles.wakeAt(new THREE.Vector3(v.pos.x - Math.sin(v.heading) * 2.6, 0, v.pos.z - Math.cos(v.heading) * 2.6), player.speed);
     audio.setEngine(player.speed / 40, true);
     if (input.pressed('KeyE') && !updatePlayer._eLock) { updatePlayer._eLock = true; exitVehicle(); }
@@ -510,7 +510,7 @@ function animate() {
     sunOffset.set(p.sunPos[0], p.sunPos[1], p.sunPos[2]);
     lighting.sun.position.set(player.pos.x + sunOffset.x, sunOffset.y, player.pos.z + sunOffset.z);
     lighting.sun.target.position.copy(player.pos);
-    if (!staged) hud.showDistrict(districtAt(player.pos.x, player.pos.z));
+    if (staged === false) hud.showDistrict(districtAt(player.pos.x, player.pos.z));
   }
   updateCamera(dt);
   // HUD + minimap
