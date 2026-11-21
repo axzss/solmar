@@ -1,7 +1,7 @@
 // SOLMAR v4 — particles: GPU-ish rain streaks, debris bursts, smoke sprites,
 // explosion flash, boat wake foam, hydrant spray.
 import * as THREE from 'three';
-import { smoothGeo } from './textures.js';
+import { smoothGeo, rbox } from './textures.js';
 
 function radialSpriteTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 64;
@@ -36,7 +36,7 @@ export class Particles {
     // debris pool
     this.debris = [];
     for (let i = 0; i < 160; i++) {
-      const m = new THREE.Mesh(smoothGeo(new THREE.BoxGeometry(0.14, 0.14, 0.14)),
+      const m = new THREE.Mesh(rbox(0.14, 0.14, 0.14, 0.05, 2),
         new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true }));
       m.visible = false; scene.add(m);
       this.debris.push({ mesh: m, vel: new THREE.Vector3(), life: 0 });
