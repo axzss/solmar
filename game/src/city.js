@@ -300,7 +300,9 @@ export function buildCity(scene, rng) {
   signBack.position.set(0, 11.4, 5.4); signBack.castShadow = true; bank.add(signBack);
   const signFace = new THREE.Mesh(new THREE.PlaneGeometry(14.6, 3.2),
     new THREE.MeshBasicMaterial({ map: signTex }));
-  signFace.position.set(0, 11.4, 5.68); bank.add(signFace);
+  // face must sit IN FRONT of the backbox front (extrude depth 0.5 + bevel
+  // 0.1 puts the front at ~z 6.0) or the text hides inside the box.
+  signFace.position.set(0, 11.4, 6.18); bank.add(signFace);
   neonMats.push(signFace.material);
   // steps + bollards
   for (let s = 0; s < 3; s++) {

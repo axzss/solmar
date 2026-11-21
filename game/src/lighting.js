@@ -54,6 +54,9 @@ function skyCanvas(p) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.mapping = THREE.EquirectangularReflectionMapping;
+  // equirect sky: canvas top is the zenith — do NOT flip (default flipY
+  // inverts the gradient and puts the pale horizon on top of the sky).
+  t.flipY = false;
   return t;
 }
 

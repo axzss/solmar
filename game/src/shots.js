@@ -51,8 +51,8 @@ export function stageShot(name, w) {
     w.combat.setWeapon('pistol');
     w.peds.scare(30, -12, 26);
     lookAt(camera,
-      new THREE.Vector3(30 + 3.5, 3.4, -12 + 9.5),
-      new THREE.Vector3(30, 4.6, -30));
+      new THREE.Vector3(30 + 4.0, 4.0, -12 + 11.0),
+      new THREE.Vector3(30, 5.2, -30));
     hud.toast('MISSION 3 — grab the cash');
   } else if (name === 'storm') {
     // Shot 3 — dusk rain, low chase cam behind the sports car drifting a wet
@@ -94,8 +94,8 @@ export function stageShot(name, w) {
     missions.beacon.visible = false;
     police.update(0.01, w.time, player, w.policeCallbacks);
     lookAt(camera,
-      new THREE.Vector3(30, 5.2, 146),
-      new THREE.Vector3(43, 1.4, 163));
+      new THREE.Vector3(34, 4.2, 150),
+      new THREE.Vector3(43, 1.2, 164));
     hud.setCenter('<div style="background:rgba(0,0,0,0.65);padding:10px 18px;border-radius:8px;color:#ffd76a;font-weight:bold">MISSION COMPLETE — +$3000 · SOLMAR LEGEND</div>');
   } else {
     w.staged = false;
