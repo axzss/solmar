@@ -25,7 +25,7 @@ export const PRESETS = {
     label: 'NIGHT', clock: '22:15', sunColor: 0x8aa8ff, sunI: 0.55,
     sunPos: [-40, 60, -80], hemiSky: 0x24355e, hemiGround: 0x0e0e14, hemiI: 0.35,
     skyTop: '#060a1e', skyMid: '#101c3e', skyBot: '#1c2a52',
-    fog: 0x0a1226, fogDensity: 0.0017, exposure: 1.08, envI: 0.5, lampI: 2.6, neonI: 2.6,
+    fog: 0x0a1226, fogDensity: 0.0012, exposure: 1.08, envI: 0.5, lampI: 2.6, neonI: 2.6,
   },
 };
 

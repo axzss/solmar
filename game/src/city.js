@@ -258,10 +258,21 @@ export function buildCity(scene, rng) {
   const bank = new THREE.Group(); bank.position.set(30, 0, -30); scene.add(bank);
   const bankBase = new THREE.Mesh(rbox(26, 1.2, 16, 0.15, 4), phys({ color: 0xb8b0a0, roughness: 0.8 }));
   bankBase.position.y = 0.6; bankBase.receiveShadow = true; bank.add(bankBase);
-  const bankHall = new THREE.Mesh(rbox(22, 9, 12, 0.15, 4), phys({ color: 0xd8cfb8, roughness: 0.7 }));
-  bankHall.position.y = 1.2 + 4.5; bankHall.castShadow = true; bankHall.receiveShadow = true; bank.add(bankHall);
+  // Open-front pavilion (NOT a solid box): back wall + side walls + roof slab,
+  // so the lit interior is genuinely visible through the glass front.
+  const bankWallMat = phys({ color: 0xd8cfb8, roughness: 0.7 });
+  const bankBack = new THREE.Mesh(rbox(22, 9, 0.6, 0.12, 3), bankWallMat);
+  bankBack.position.set(0, 1.2 + 4.5, -5.7); bankBack.castShadow = true; bank.add(bankBack);
+  for (const s of [-1, 1]) {
+    const side = new THREE.Mesh(rbox(0.6, 9, 12, 0.12, 3), bankWallMat);
+    side.position.set(s * 10.7, 1.2 + 4.5, 0); side.castShadow = true; bank.add(side);
+  }
+  const bankRoof = new THREE.Mesh(rbox(23, 0.8, 13, 0.12, 3), phys({ color: 0x8a8578, roughness: 0.8 }));
+  bankRoof.position.set(0, 1.2 + 9.2, 0); bankRoof.castShadow = true; bank.add(bankRoof);
+  const bankFloor = new THREE.Mesh(rbox(22, 0.3, 12, 0.08, 3), phys({ color: 0x6a5a44, roughness: 0.5, clearcoat: 0.5 }));
+  bankFloor.position.set(0, 1.35, 0); bankFloor.receiveShadow = true; bank.add(bankFloor);
   // glass front with real interior boxes behind it (cash counters, lights)
-  const glassFront = new THREE.Mesh(rbox(18, 6.5, 0.2, 0.05, 3), lensMat(0xcfe8f0));
+  const glassFront = new THREE.Mesh(rbox(18, 6.5, 0.2, 0.05, 3), glassMat(0xcfe8f0, 0.32));
   glassFront.position.set(0, 4.6, 6.05); bank.add(glassFront);
   for (let i = -1; i <= 1; i++) {
     const counter = new THREE.Mesh(rbox(3.4, 1.1, 1.2, 0.08, 3), phys({ color: 0x4a3423, roughness: 0.6, clearcoat: 0.4 }));

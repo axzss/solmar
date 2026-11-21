@@ -51,8 +51,8 @@ export function stageShot(name, w) {
     w.combat.setWeapon('pistol');
     w.peds.scare(30, -12, 26);
     lookAt(camera,
-      new THREE.Vector3(30 + 2.4, 2.1, -12 + 6.8),
-      new THREE.Vector3(30, 1.4, -30));
+      new THREE.Vector3(30 + 3.5, 3.4, -12 + 9.5),
+      new THREE.Vector3(30, 4.6, -30));
     hud.toast('MISSION 3 — grab the cash');
   } else if (name === 'storm') {
     // Shot 3 — dusk rain, low chase cam behind the sports car drifting a wet
@@ -80,17 +80,22 @@ export function stageShot(name, w) {
     // neon-lit marina, 5 stars, police boats + helicopter, city lights on water.
     set('night', 4, 5);
     w.exitVehicle(true);
-    player.pos.set(40, 0, 152); player.heading = 0; // facing the water (+z, south)
+    // Mara on the dock by the boat, facing it — close enough to read as a
+    // person, with the neon marina + skyline + dark water behind her.
+    player.pos.set(42, 0, 158); player.heading = 0.30;
     player.human.group.position.copy(player.pos);
     player.human.setPose('idle', 0.5);
     // boat right at the dock edge, bow out to sea
     w.boat.pos.set(44.5, 0, 166); w.boat.heading = 0; w.boat.speed = 0;
     w.boat.group.position.set(44.5, -0.1, 166);
     w.boat.group.rotation.y = w.boat.heading - Math.PI / 2;
+    // hide the giant beacon pillar for this shot (it filled the frame)
+    missions.beaconEnabled = false;
+    missions.beacon.visible = false;
     police.update(0.01, w.time, player, w.policeCallbacks);
     lookAt(camera,
-      new THREE.Vector3(22, 7.5, 138),
-      new THREE.Vector3(44, 1.5, 168));
+      new THREE.Vector3(30, 5.2, 146),
+      new THREE.Vector3(43, 1.4, 163));
     hud.setCenter('<div style="background:rgba(0,0,0,0.65);padding:10px 18px;border-radius:8px;color:#ffd76a;font-weight:bold">MISSION COMPLETE — +$3000 · SOLMAR LEGEND</div>');
   } else {
     w.staged = false;

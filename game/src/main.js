@@ -106,7 +106,11 @@ function applyPreset(name) {
   const wet = p.rain ? 1.0 : 0.55;
   city.asphaltMat.clearcoat = wet;
   city.asphaltMat.clearcoatRoughness = p.rain ? 0.06 : 0.22;
+  // water: dark + calm at night, bright + reflective by day
   const night = name === 'night' || name === 'dusk-rain';
+  city.waterMat.color.setHex(name === 'night' ? 0x0a1c30 : name === 'dusk-rain' ? 0x0d2a38 : 0x0e4a5e);
+  city.waterMat.envMapIntensity = name === 'night' ? 0.55 : name === 'dusk-rain' ? 0.8 : 1.6;
+  city.waterMat.roughness = name === 'night' ? 0.22 : 0.12;
   for (const d of parked) d.setHeadlights(night, 60);
   return p;
 }

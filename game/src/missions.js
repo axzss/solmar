@@ -60,6 +60,7 @@ export class MissionManager {
     this.taxi = null; this.bankCash = 0;
     // beacon: additive cylinder + rotating octahedron diamond
     this.beacon = new THREE.Group();
+    this.beaconEnabled = true; // staged night shot hides the beacon pillar
     const cyl = new THREE.Mesh(
       new THREE.CylinderGeometry(1.6, 1.6, 30, 16, 1, true),
       new THREE.MeshBasicMaterial({ color: 0xffd76a, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
@@ -134,8 +135,8 @@ export class MissionManager {
         this.onEvent({ type: 'timer-fail', mission: m });
       }
     }
-    const tp = this.targetPos();
-    if (tp) {
+    const tp = this.pinTarget || this.targetPos();
+    if (tp && this.beaconEnabled) {
       this.beacon.visible = true;
       this.beacon.position.set(tp.x, 0, tp.z);
       this.beacon.userData.diamond.rotation.y += dt * 2;
