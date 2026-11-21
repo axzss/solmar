@@ -81,20 +81,21 @@ export function stageShot(name, w) {
     set('night', 4, 5);
     w.exitVehicle(true);
     // Mara on the dock LEFT of the boat (clear of the centre banner),
-    // facing the boat — big enough to read as a person.
-    player.pos.set(38.5, 0, 159); player.heading = 0.8;
+    // facing the boat. NOTE: updatePlayer clamps player z to <=152, so
+    // staging her any further south silently teleports her to the edge.
+    player.pos.set(42, 0, 150); player.heading = 0.21;
     player.human.group.position.copy(player.pos);
     player.human.setPose('idle', 0.5);
     // boat right at the dock edge, bow out to sea
-    w.boat.pos.set(44.5, 0, 166); w.boat.heading = 0; w.boat.speed = 0;
-    w.boat.group.position.set(44.5, -0.1, 166);
+    w.boat.pos.set(44.5, 0, 162); w.boat.heading = 0; w.boat.speed = 0;
+    w.boat.group.position.set(44.5, -0.1, 162);
     w.boat.group.rotation.y = w.boat.heading - Math.PI / 2;
     // hide the giant beacon pillar for this shot (it filled the frame)
     missions.beaconEnabled = false;
     missions.beacon.visible = false;
     police.update(0.01, w.time, player, w.policeCallbacks);
     lookAt(camera,
-      new THREE.Vector3(34, 4.2, 150),
+      new THREE.Vector3(33, 4.5, 141),
       new THREE.Vector3(43, 1.2, 164));
     hud.setCenter('<div style="background:rgba(0,0,0,0.65);padding:10px 18px;border-radius:8px;color:#ffd76a;font-weight:bold">MISSION COMPLETE — +$3000 · SOLMAR LEGEND</div>');
   } else {
