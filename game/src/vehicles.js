@@ -2,7 +2,7 @@
 // TorusGeometry wheel arches + scaled-sphere hood/trunk bulges + Lathe rims.
 // Boat hull: Lathe profile scaled long + beveled deck extrude.
 import * as THREE from 'three';
-import { rbox, bevelExtrude, rectShape, phys, paintMat, glassMat, lensMat, rubberMat, chromeMat, smoothGeo } from './textures.js';
+import { rbox, bevelExtrude, rectShape, phys, paintMat, fabricMat, glassMat, lensMat, rubberMat, chromeMat, smoothGeo } from './textures.js';
 import { clamp, damp, angleLerp } from './rng.js';
 
 function latheRim() {

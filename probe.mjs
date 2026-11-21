@@ -32,7 +32,7 @@ await sleep(1500);
 const chrome = spawn(CHROME, [
   '--headless=new', '--no-sandbox', '--disable-dev-shm-usage',
   '--window-size=1280,720', '--remote-debugging-port=9222',
-  '--user-data-dir=/tmp/solmar-v4-chrome-profile',
+  '--user-data-dir=/tmp/solmar-v4-chrome-profile-' + Date.now(),
   '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
   'about:blank',
 ], { stdio: 'ignore' });
@@ -94,6 +94,7 @@ for (const shot of targets) {
       ready = await evalJs('window.__shotReady === true');
       lastState = await evalJs('(window.__game && window.__game.player) ? ("health " + window.__game.player.health + " wanted " + window.__game.police.wanted + " mission " + window.__game.missions.index) : "no-game"');
     } catch { /* page still loading */ }
+    console.log(`[${shot.name}] poll t=${Math.round((Date.now() - t0) / 1000)}s ready=${ready} state=${lastState} errs=${consoleErrs.length} exc=${exceptions.length} failed=${failedReqs.length}`);
     if (ready) break;
   }
   await sleep(2500); // let bloom/SSAO settle one more frame
